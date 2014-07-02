@@ -16,7 +16,8 @@ module.exports = function(grunt) {
   grunt.registerMultiTask('karma', 'run karma.', function() {
     var done = this.async();
     var options = this.options({
-      background: false
+      background: false,
+      silent: false
     });
 
     if (!options.client) {
@@ -68,7 +69,15 @@ module.exports = function(grunt) {
 
     //allow karma to be run in the background so it doesn't block grunt
     if (data.background){
-      var backgroundProcess = grunt.util.spawn({cmd: 'node', args: [path.join(__dirname, '..', 'lib', 'background.js'), JSON.stringify(data)]}, function(){});
+      var spawnOpts = {stdio: 'ignore'}
+      if (!data.silent)
+        spawnOpts.stdio = 'inherit'
+
+      var backgroundProcess = grunt.util.spawn({
+        cmd: 'node',
+        args: [path.join(__dirname, '..', 'lib', 'background.js'), JSON.stringify(data)],
+        opts: spawnOpts
+      }, function(){});
       process.on('exit', function () {
         backgroundProcess.kill();
       });
